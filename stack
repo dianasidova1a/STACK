@@ -1,0 +1,118 @@
+Source.cpp
+
+#include <Windows.h>
+#include <stack>
+#include"Header.h"
+#include <string>
+
+#define ID_BUTTON 1003
+#define ID_EDIT1 1001
+#define ID_EDIT2 1002
+
+
+
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR args, int ncmdshow) {
+	
+	WNDCLASS SoftwareMainClass = NewIndowClass((HBRUSH)COLOR_WINDOW, LoadCursor(NULL, IDC_HAND), hInst, LoadIcon(NULL, IDI_QUESTION),
+		L"MainWindClass", SoftwareMaininProcedure);
+
+	if (!RegisterClassW(&SoftwareMainClass)) { return -1; }
+
+	MSG SoftwareMainMessage = { 0 };
+
+	CreateWindow(L"MainWindClass", L"STACK", WS_OVERLAPPEDWINDOW | WS_VISIBLE, 100, 100, 500, 250, NULL, NULL, NULL, NULL);
+	while (GetMessage(&SoftwareMainMessage, NULL, NULL, NULL)) {
+		TranslateMessage(&SoftwareMainMessage);
+		DispatchMessage(&SoftwareMainMessage);
+	}
+	return 0;
+}
+
+WNDCLASS NewIndowClass(HBRUSH BGColor, HCURSOR Cursor, HINSTANCE hInst, HICON Icon, LPCWSTR Name, WNDPROC Procedure) {
+
+	WNDCLASS NWC = { 0 };
+
+	NWC.hCursor = Cursor;
+	NWC.hIcon = Icon;
+	NWC.hInstance = hInst;
+	NWC.lpszClassName = Name;
+	NWC.hbrBackground = BGColor;
+	NWC.lpfnWndProc = Procedure;
+
+	return NWC;
+}
+
+LRESULT CALLBACK SoftwareMaininProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp) {
+	std::stack<char> stack;
+	
+
+
+
+	switch (msg) {
+	
+	case WM_CREATE:
+		MainWndAddWidgets(hWnd);
+		break;
+
+	case WM_COMMAND:
+		if (HIWORD(wp) == BN_CLICKED && LOWORD(wp) == ID_BUTTON) {
+			HWND hwndChildEdit1 = FindWindowExA(hWnd, NULL, "edit", NULL);
+			HWND hwndChildEdit2 = FindWindowExA(hWnd, hwndChildEdit1, "edit", NULL);
+
+			char buff[1024];
+			GetWindowTextA(hwndChildEdit1, buff, 1024);
+
+			std::string str(buff);
+
+			for (int i = 0; i < str.size(); i++) {
+				stack.push(str[i]);
+			}
+			std::string outstr;
+			for (int i = 0; i < str.size(); i++) {
+				outstr += stack.top();
+				stack.pop();
+			}
+
+			SetWindowTextA(hwndChildEdit2, outstr.c_str());
+
+		}
+
+		break;
+
+
+
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	default: return DefWindowProc(hWnd, msg, wp, lp);
+	}
+}
+
+void MainWndAddWidgets(HWND hWnd) {
+
+	CreateWindowA("static", "Работа со стеком", WS_VISIBLE | WS_CHILD | ES_CENTER, 80, 30, 350, 30, hWnd, NULL, NULL, NULL);
+
+	CreateWindowA("static", "Исходные данные:", WS_VISIBLE | WS_CHILD, 5, 60, 350, 30, hWnd, NULL, NULL, NULL);
+
+	CreateWindowA("static", "Результат:", WS_VISIBLE | WS_CHILD, 5, 110, 350, 30, hWnd, NULL, NULL, NULL);
+
+	CreateWindowA("edit", "", WS_VISIBLE | WS_CHILD | ES_MULTILINE, 5, 80, 450, 30, hWnd, (HMENU)ID_EDIT1, NULL, NULL);
+
+	CreateWindowA("button", "Click me", WS_VISIBLE | WS_CHILD | ES_CENTER, 5, 170, 120, 30, hWnd, (HMENU)ID_BUTTON, NULL, NULL);
+
+	CreateWindowA("edit", "", WS_VISIBLE | WS_CHILD | ES_MULTILINE, 5, 130, 450, 30, hWnd, (HMENU)ID_EDIT2, NULL, NULL);
+
+}
+ 
+ 
+ 
+ 
+ Hearder.h
+ #pragma once
+
+
+LRESULT CALLBACK SoftwareMaininProcedure(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+WNDCLASS NewIndowClass(HBRUSH BGColor, HCURSOR Cursor, HINSTANCE hInst, HICON Icon, LPCWSTR Name, WNDPROC Procedure);
+
+void MainWndAddWidgets(HWND hWnd);
+ 
